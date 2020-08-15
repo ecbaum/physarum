@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.ndimage
 from cell import Cell
+import time
 
 
 class DataMap:
@@ -8,6 +9,9 @@ class DataMap:
         self.size = np.array(size)
         self.grid = np.zeros(self.size, dtype=int)
         self.cells = []
+
+    def valid(self, pos):
+        return 0 <= pos[0] < self.size[0] and 0 < pos[1] < self.size[1]
 
     def generate_cells(self, amount):
 
@@ -28,9 +32,13 @@ class DataMap:
         return
 
     def cell_operation(self, tm):
+
         for cell in self.cells:
-            cell.observe(tm)  # Sensory stage
-            cell.move(self)   # Motor stage
+            cell.observe(tm)
+
+        for cell in self.cells:
+            cell.move(self)
+
         return
 
 
@@ -39,8 +47,11 @@ class TrailMap:
         self.size = np.array(size)
         self.grid = np.zeros(self.size)
 
-        self.alpha = 0.93
-        self.sigma = 1.1
+        self.alpha = 0.6
+        self.sigma = 1
+
+    def valid(self, pos):
+        return 0 <= pos[0] < self.size[0] and 0 < pos[1] < self.size[1]
 
     def diffuse(self, dm):
         self.grid = self.grid + dm.grid

@@ -1,35 +1,25 @@
-import numpy as np
 from maps import DataMap, TrailMap
-from cell import Cell
 import matplotlib.pyplot as plt
-import time
 
-
-
-
-
-sz = (50, 50)
+sz = (200, 200)
+cells = 1000
 
 dm = DataMap(sz)
 tm = TrailMap(sz)
 
-dm.generate_cells(200)
+dm.generate_cells(cells)
 tm.diffuse(dm)
 
 fig, (ax1, ax2) = plt.subplots(1, 2)
+im1 = ax1.imshow(dm.grid)
+im2 = ax2.imshow(tm.grid)
 
-for i in range(100):
+for i in range(1000):
     dm.cell_operation(tm)
     tm.diffuse(dm)
-    ax1.imshow(dm.grid)
-    ax2.imshow(tm.grid)
-    plt.pause(0.05)
-plt.show()
-#dm.cell_operation(tm)
 
-#c = Cell(np.array([5, 5]))
-#c.observe(tm)
-#print(c.sensor_data)
-#print(c.decide())
-#c.view()
-#print(np.degrees(c.angle))
+    im1.set_array(dm.grid)
+    im2.set_array(tm.grid)
+    plt.pause(0.01)
+
+plt.show()
