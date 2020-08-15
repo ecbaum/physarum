@@ -1,5 +1,6 @@
-# physarum 
+# physarum pattern simulation
 
 ![Smulation image](/images/image1.png)
 
-Inspired by [Characteristics of pattern formation and evolution in approximations of physarum transport networks](https://uwe-repository.worktribe.com/output/980579)
+Inspired by a paper on [physarum patterns](https://uwe-repository.worktribe.com/output/980579) and blog post by [Sage Jenson](https://sagejenson.com/physarum).
+
