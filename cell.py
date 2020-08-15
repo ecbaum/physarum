@@ -10,6 +10,7 @@ class Cell:
         # sensor placement data
         self.sensor_distance = 8
         self.sensor_angle = np.pi/8
+        self.sensor_width = 2
 
         self.sensor_data = np.zeros(3)
 
@@ -27,9 +28,23 @@ class Cell:
         sensor_data = np.zeros(3)  # [front, left, right] measurement
         sensor_positions = self.sensor_pos()
         for i in range(3):
-            pos = tuple(sensor_positions[i, :].astype(int))
-            if tm.valid(pos):
-                sensor_data[i] = tm.grid[pos]
+
+            c = tuple(sensor_positions[i, :].astype(int))
+            w = self.sensor_width
+
+            x_range = np.arange(int(c[0] - w / 2), (int(c[0] - w / 2) + w))
+            y_range = np.arange(int(c[1] - w / 2), (int(c[1] - w / 2) + w))
+
+            edge, measurement_sum = 0, 0
+            for x in x_range:
+                for y in y_range:
+                    pos = tuple([x, y])
+                    if tm.valid(pos):
+                        measurement_sum += tm.grid[pos]
+                    else:
+                        edge = 1
+
+            sensor_data[i] = measurement_sum/(w**2) if edge == 0 else 0
 
         self.sensor_data = sensor_data
 
