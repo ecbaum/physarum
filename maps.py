@@ -8,8 +8,8 @@ class TrailMap:
         self.size = np.array(size)
         self.grid = np.zeros(self.size)
 
-        self.alpha = 0.5
-        self.sigma = 1.2
+        self.alpha = 0.6
+        self.sigma = 1
 
     def diffuse(self, data_grid):
         self.grid = self.grid + data_grid

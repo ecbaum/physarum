@@ -1,5 +1,4 @@
 .idea/
 venv/
 __pycache__/
-video.avi
-temp.png
+video_out/
