@@ -8,11 +8,8 @@ class TrailMap:
         self.size = np.array(size)
         self.grid = np.zeros(self.size)
 
-        self.alpha = 0.6
-        self.sigma = 1
-
-    def valid(self, pos):
-        return 0 <= pos[0] < self.size[0] and 0 < pos[1] < self.size[1]
+        self.alpha = 0.5
+        self.sigma = 1.2
 
     def diffuse(self, data_grid):
         self.grid = self.grid + data_grid
@@ -27,16 +24,14 @@ class DataMap:
         self.species = []
         self.trail_sum = np.zeros(self.size)
 
-    def valid(self, pos):
-        return 0 <= pos[0] < self.size[0] and 0 < pos[1] < self.size[1]
-
     def img(self):
-
-        bl = np.zeros(self.size)
-        img = np.dstack((bl, bl, bl))
+        bg_color = [0.1, 0.1, 0.3]
+        img = np.dstack((np.ones(self.size)*bg_color[0],
+                         np.ones(self.size)*bg_color[0],
+                         np.ones(self.size)*bg_color[0]))
 
         for i in range(len(self.species)):
-            img[:, :, i] = 5*self.species[i].trail.grid
+            img[:, :, i] += 5*self.species[i].trail.grid
 
         img[np.where(img > 1)] = 1
         return img
@@ -60,11 +55,7 @@ class DataMap:
                     break
 
         species = Species(cells[0:i], spc_grid, TrailMap(self.size))
-
         self.species.append(species)
-        print("Generated " + str(i) + "/" + str(amount) + " cells of species " + chr(len(self.species)+64))
-
-        return
 
     def deposit_species_trail(self):
         #  Clear Trail sum
@@ -90,8 +81,6 @@ class DataMap:
 
             for cell in spc.cells:
                 cell.move(self, spc)
-
-        return
 
 
 class Species:

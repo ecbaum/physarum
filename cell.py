@@ -1,8 +1,5 @@
 import numpy as np
-
-
-def valid(pos, grid):
-    return 0 <= pos[0] < grid.shape[0] and 0 < pos[1] < grid.shape[1]
+from helpers import valid
 
 
 class Cell:
@@ -76,7 +73,7 @@ class Cell:
 
         next_pos = self.pos + 1.1*np.hstack((np.cos(self.angle), np.sin(self.angle)))
 
-        if dm.valid(next_pos):
+        if valid(next_pos, dm.grid):
 
             dm.grid[tuple(self.pos.astype(int))] = 0
             dm.grid[tuple(next_pos.astype(int))] = 1
