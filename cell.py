@@ -1,6 +1,10 @@
 import numpy as np
 
 
+def valid(pos, grid):
+    return 0 <= pos[0] < grid.shape[0] and 0 < pos[1] < grid.shape[1]
+
+
 class Cell:
     def __init__(self, pos):
         # positional data
@@ -12,8 +16,7 @@ class Cell:
         self.sensor_angle = np.pi/8
         self.sensor_width = 2
 
-        self.sensor_data_spc = np.zeros(3)
-        self.sensor_data_aln = np.zeros(3)
+        self.sensor_data = np.zeros(3)
 
     def sensor_pos(self):
         angles = np.array([[self.angle],                            # Front
@@ -25,7 +28,7 @@ class Cell:
 
         return np.hstack((x, y))
 
-    def observe(self, tm, within_spc):
+    def observe(self, grid):
         sensor_data = np.zeros(3)  # [front, left, right] measurement
         sensor_positions = self.sensor_pos()
         for i in range(3):
@@ -40,21 +43,19 @@ class Cell:
             for x in x_range:
                 for y in y_range:
                     pos = tuple([x, y])
-                    if tm.valid(pos):
-                        measurement_sum += tm.grid[pos]
+                    if valid(pos, grid):
+                        measurement_sum += grid[pos]
                     else:
                         edge = 1
 
             sensor_data[i] = measurement_sum/(w**2) if edge == 0 else 0
 
-        if within_spc:
-            self.sensor_data_spc = sensor_data
-        else:
-            self.sensor_data_aln = sensor_data
+        self.sensor_data = sensor_data
 
     def decide(self):
 
-        front, left, right = self.sensor_data_spc - self.sensor_data_aln
+        front, left, right = self.sensor_data
+
         rotation = 2
 
         if front > left and front > right:

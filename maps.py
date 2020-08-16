@@ -1,8 +1,6 @@
 import numpy as np
 import scipy.ndimage
 from cell import Cell
-from collections import deque
-import time
 
 
 class TrailMap:
@@ -27,9 +25,21 @@ class DataMap:
         self.grid = np.zeros(self.size, dtype=int)
 
         self.species = []
+        self.trail_sum = np.zeros(self.size)
 
     def valid(self, pos):
         return 0 <= pos[0] < self.size[0] and 0 < pos[1] < self.size[1]
+
+    def img(self):
+
+        bl = np.zeros(self.size)
+        img = np.dstack((bl, bl, bl))
+
+        for i in range(len(self.species)):
+            img[:, :, i] = 5*self.species[i].trail.grid
+
+        img[np.where(img > 1)] = 1
+        return img
 
     def generate_cell_species(self, amount):
 
@@ -57,23 +67,26 @@ class DataMap:
         return
 
     def deposit_species_trail(self):
+        #  Clear Trail sum
+        self.trail_sum = np.zeros(self.size)
+
         for spc in self.species:
             spc.deposit()
+            self.trail_sum += spc.trail.grid  # sum all trails
 
     def species_activity(self):
 
         for spc in self.species:
 
-            for cell in spc.cells:
-                cell.observe(spc.trail.grid, True)  # Sense trail of species
+            # Species specific trail environment (E) = within species trail (W) - alien species trails (A)
+            # trail_sum (S) = within species trail (W) + alien species trails (A)
 
-            trail_data = np.zeros(self.size)        # Sum trail of all other species
-            for cmp_spc in self.species:
-                if cmp_spc is not spc:
-                    trail_data = trail_data + cmp_spc.trail.grid
+            # S = W + A  =>   A = S - W;    E = W - A =  W - (S - W)  =  2*W - S
+
+            trail_env = 2*spc.trail.grid - self.trail_sum
 
             for cell in spc.cells:
-                cell.observe(trail_data, False)  # Sense trail of alien species
+                cell.observe(trail_env)  # Sense trail of species
 
             for cell in spc.cells:
                 cell.move(self, spc)
