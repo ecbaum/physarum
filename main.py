@@ -9,16 +9,13 @@ from helpers import VideoWriter, VideoWriterIo
 save_video = 0
 show_entropy = 0
 
-sz = (200, 260)
+sz = (100, 130)
 dm = DataMap(sz)
 
-dm.generate_cell_species(400)
-#dm.generate_cell_species(400)
-#dm.generate_cell_species(400)
+dm.generate_cell_species(200)
 
-simulation_length = 150
+simulation_length = 240
 fps = 60
-
 
 dm.deposit_species_trail()
 entropy = np.zeros(simulation_length)

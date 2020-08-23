@@ -25,22 +25,23 @@ class DataMap:
         self.species = []
         self.trail_sum = np.zeros(self.size)
 
-        self.color_maps = {0: 'viridis', 1: 'plasma', 2: 'cubehelix'}
-        self.color_intensity = [9, 7, 5]
-        if len(self.species) > 3:
-            raise Exception("Color map currently only support up to three species")
+        self.color_bias = [0, 0.45, 0.6]
+        self.color_maps = {0: 'Greens', 1: 'Reds', 2: 'Blues'}
+        self.color_intensity = [5, 5, 5]
 
     def img(self):
         img = np.zeros(np.hstack((self.size, 4)))
-        bias = 0 if len(self.species) == 1 else 0.2
-        for i in range(len(self.species)):
-            img = img + plt.get_cmap(self.color_maps[i])(self.color_intensity[i]*self.species[i].trail.grid) - bias
+        n = len(self.species)
+        for i in range(n):
+            c_map = plt.get_cmap(self.color_maps[i])
+            img = img + c_map(self.color_intensity[i] * self.species[i].trail.grid) - self.color_bias[n-1]
         img[np.where(img > 1)] = 1
         img[np.where(img < 0)] = 0
         return img
 
     def generate_cell_species(self, amount):
-
+        if len(self.species) >= 3:
+            raise Exception("Color map currently only support up to three species")
         cells = np.empty(amount, dtype=Cell)          # Cells in species
         spc_grid = np.zeros(self.size, dtype=int)     # Species grid
 
