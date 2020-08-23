@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.ndimage
 from cell import Cell
+import matplotlib.pyplot as plt
 
 
 class TrailMap:
@@ -24,16 +25,18 @@ class DataMap:
         self.species = []
         self.trail_sum = np.zeros(self.size)
 
+        self.color_maps = {0: 'viridis', 1: 'plasma', 2: 'cubehelix'}
+        self.color_intensity = [9, 7, 5]
+        if len(self.species) > 3:
+            raise Exception("Color map currently only support up to three species")
+
     def img(self):
-        bg_color = [0.1, 0.1, 0.3]
-        img = np.dstack((np.ones(self.size)*bg_color[0],
-                         np.ones(self.size)*bg_color[0],
-                         np.ones(self.size)*bg_color[0]))
-
+        img = np.zeros(np.hstack((self.size, 4)))
+        bias = 0 if len(self.species) == 1 else 0.2
         for i in range(len(self.species)):
-            img[:, :, i] += 5*self.species[i].trail.grid
-
+            img = img + plt.get_cmap(self.color_maps[i])(self.color_intensity[i]*self.species[i].trail.grid) - bias
         img[np.where(img > 1)] = 1
+        img[np.where(img < 0)] = 0
         return img
 
     def generate_cell_species(self, amount):
