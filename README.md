@@ -8,7 +8,7 @@ These sets of traits and conditions, published in a paper on [physarum patterns]
 </p>
 
 
-### installation windows
+### installation
 ```
 virtualenv venv 
 venv\Scripts\activate
