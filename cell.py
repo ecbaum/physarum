@@ -1,5 +1,5 @@
 import numpy as np
-from helpers import valid
+from helpers import valid, grid_id
 
 
 class Cell:
@@ -28,32 +28,16 @@ class Cell:
     def observe(self, grid):
         sensor_data = np.zeros(3)  # [front, left, right] measurement
         sensor_positions = self.sensor_pos()
+
         for i in range(3):
-
-            c = tuple(sensor_positions[i, :].astype(int))
-            w = self.sensor_width
-
-            x_range = np.arange(int(c[0] - w / 2), (int(c[0] - w / 2) + w))
-            y_range = np.arange(int(c[1] - w / 2), (int(c[1] - w / 2) + w))
-
-            edge, measurement_sum = 0, 0
-            for x in x_range:
-                for y in y_range:
-                    pos = tuple([x, y])
-                    if valid(pos, grid):
-                        measurement_sum += grid[pos]
-                    else:
-                        edge = 1
-
-            sensor_data[i] = measurement_sum/(w**2) if edge == 0 else 0
+            if valid(sensor_positions[i, :], grid):
+                sensor_data[i] += grid[grid_id(sensor_positions[i, :])]
 
         self.sensor_data = sensor_data
 
     def decide(self):
 
         front, left, right = self.sensor_data
-
-        rotation = 2
 
         if front > left and front > right:
             rotation = 0
@@ -63,22 +47,24 @@ class Cell:
             rotation = -1
         elif right < left:
             rotation = 1
+        else:
+            rotation = 2
 
-        return rotation
+        return rotation * np.pi
 
     def move(self, dm, spc):
 
-        self.angle += np.random.rand(1) * self.decide() * np.pi
+        self.angle += np.random.rand(1) * self.decide()
         self.angle = np.mod(self.angle, 2 * np.pi)
 
-        next_pos = self.pos + 1.1*np.hstack((np.cos(self.angle), np.sin(self.angle)))
+        next_pos = self.pos + np.hstack((np.cos(self.angle), np.sin(self.angle)))
 
         if valid(next_pos, dm.grid):
 
-            dm.grid[tuple(self.pos.astype(int))] = 0
-            dm.grid[tuple(next_pos.astype(int))] = 1
+            dm.grid[grid_id(self.pos)] = 0
+            dm.grid[grid_id(next_pos)] = 1
 
-            spc.grid[tuple(self.pos.astype(int))] = 0
-            spc.grid[tuple(next_pos.astype(int))] = 1
+            spc.grid[grid_id(self.pos)] = 0
+            spc.grid[grid_id(next_pos)] = 1
 
             self.pos = next_pos

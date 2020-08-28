@@ -70,3 +70,7 @@ class VideoWriter:
 
 def valid(pos, grid):
     return 0 <= pos[0] < grid.shape[0] and 0 < pos[1] < grid.shape[1]
+
+
+def grid_id(pos):
+    return tuple(pos.astype(int))

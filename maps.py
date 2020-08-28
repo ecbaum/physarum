@@ -1,7 +1,10 @@
 import numpy as np
 import scipy.ndimage
-from cell import Cell
 import matplotlib.pyplot as plt
+from cell import Cell
+from helpers import grid_id
+
+
 
 
 class TrailMap:
@@ -49,10 +52,10 @@ class DataMap:
         for k in range(amount):
             for tries in range(30):
                 pos = self.size*np.random.rand(2)
-                if self.grid[tuple(pos.astype(int))] == 0:
+                if self.grid[grid_id(pos)] == 0:
 
-                    self.grid[tuple(pos.astype(int))] = 1   # Add cell pos to global grid
-                    spc_grid[tuple(pos.astype(int))] = 1    # Add cell pos to species grid
+                    self.grid[grid_id(pos)] = 1   # Add cell pos to global grid
+                    spc_grid[grid_id(pos)] = 1    # Add cell pos to species grid
 
                     cells[i] = Cell(pos)
                     i += 1
