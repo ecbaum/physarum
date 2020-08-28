@@ -42,18 +42,5 @@ class DataMap:
             self.trail_sum += spc.trail.grid  # sum all trails
 
     def species_activity(self):
-
         for spc in self.species:
-
-            # Species specific trail environment (E) = within species trail (W) - alien species trails (A)
-            # trail_sum (S) = within species trail (W) + alien species trails (A)
-
-            # S = W + A  =>   A = S - W;    E = W - A =  W - (S - W)  =  2*W - S
-
-            trail_env = 2*spc.trail.grid - self.trail_sum
-
-            for cell in spc.cells:
-                cell.observe(trail_env)  # Sense trail of species
-
-            for cell in spc.cells:
-                cell.move(self, spc)
+            spc.activate(self)

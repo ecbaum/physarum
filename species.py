@@ -31,6 +31,12 @@ class Species:
     def deposit(self):
         self.trail.diffuse(self.grid)
 
+    def activate(self, data_map):
+        trail_env = 2 * self.trail.grid - data_map.trail_sum
+        for cell in self.cells:
+            cell.observe(trail_env)  # Sense trail of species
+            cell.move(data_map, self)
+
 
 class Trail:
     def __init__(self, size):
