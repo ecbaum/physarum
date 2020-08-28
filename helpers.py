@@ -7,6 +7,20 @@ from datetime import datetime
 from pathlib import Path
 import skimage.measure
 
+
+class DisplayEnvironment:
+    def __init__(self, image):
+        plt.figure()
+        self.fig = plt.imshow(image)
+        plt.gca().set_axis_off()
+        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+        plt.margins(0, 0)
+
+    def update(self, image):
+        self.fig.set_array(image)
+        plt.pause(0.01)
+
+
 class VideoWriterIo:
     def __init__(self, write_vid, fps):
         self.write_vid = write_vid
