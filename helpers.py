@@ -1,10 +1,11 @@
-import matplotlib.pyplot as plt
-from datetime import datetime
-from pathlib import Path
 import cv2
 import os
 import imageio
-
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+from pathlib import Path
+import skimage.measure
 
 class VideoWriterIo:
     def __init__(self, write_vid, fps):
@@ -66,6 +67,25 @@ class VideoWriter:
             cv2.destroyAllWindows()
             self.video.release()
             os.remove(self.fig_path)
+
+
+class EntropyRecorder:
+    def __init__(self, simulation_length, run):
+        self.entropy = np.zeros(simulation_length)
+        self.run = run
+
+    def record(self, i, grid):
+        if self.run:
+            self.entropy[i] = skimage.measure.shannon_entropy(grid)
+
+    def plot(self):
+        if self.run:
+            plt.show()
+            plt.figure()
+            plt.plot(self.entropy)
+            plt.title("Entropy of system over time")
+            plt.ylabel("Shannon entropy")
+            plt.xlabel("Iteration")
 
 
 def valid(pos, grid):

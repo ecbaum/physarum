@@ -1,23 +1,6 @@
 import numpy as np
-import scipy.ndimage
 import matplotlib.pyplot as plt
-from cell import Cell
-from helpers import grid_id
-
-
-
-
-class TrailMap:
-    def __init__(self, size):
-        self.size = np.array(size)
-        self.grid = np.zeros(self.size)
-
-        self.alpha = 0.6
-        self.sigma = 1
-
-    def diffuse(self, data_grid):
-        self.grid = self.grid + data_grid
-        self.grid = self.alpha * scipy.ndimage.filters.gaussian_filter(self.grid, self.sigma)
+from species import Species
 
 
 class DataMap:
@@ -42,27 +25,13 @@ class DataMap:
         img[np.where(img < 0)] = 0
         return img
 
-    def generate_cell_species(self, amount):
+    def generate_species(self, cell_amount):
         if len(self.species) >= 3:
             raise Exception("Color map currently only support up to three species")
-        cells = np.empty(amount, dtype=Cell)          # Cells in species
-        spc_grid = np.zeros(self.size, dtype=int)     # Species grid
 
-        i = 0
-        for k in range(amount):
-            for tries in range(30):
-                pos = self.size*np.random.rand(2)
-                if self.grid[grid_id(pos)] == 0:
-
-                    self.grid[grid_id(pos)] = 1   # Add cell pos to global grid
-                    spc_grid[grid_id(pos)] = 1    # Add cell pos to species grid
-
-                    cells[i] = Cell(pos)
-                    i += 1
-                    break
-
-        species = Species(cells[0:i], spc_grid, TrailMap(self.size))
-        self.species.append(species)
+        spc = Species(self.size)
+        spc.generate_cells(cell_amount)
+        self.species.append(spc)
 
     def deposit_species_trail(self):
         #  Clear Trail sum
@@ -88,14 +57,3 @@ class DataMap:
 
             for cell in spc.cells:
                 cell.move(self, spc)
-
-
-class Species:
-    def __init__(self, cells, grid, trail):
-        self.cells = cells
-        self.amount = len(cells)
-        self.grid = grid
-        self.trail = trail
-
-    def deposit(self):
-        self.trail.diffuse(self.grid)
