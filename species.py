@@ -15,12 +15,13 @@ class Species:
     def generate_cells(self, amount):
 
         self.cells = np.empty(amount, dtype=Cell)  # Cells in species
-
+        r = self.size[0] / 2 * 0.8
+        c = self.size / 2
         i = 0
         for k in range(amount):
             for tries in range(30):
                 pos = self.size * np.random.rand(2)
-                if self.grid[grid_id(pos)] == 0:
+                if np.linalg.norm(c-pos) < r:
                     self.grid[grid_id(pos)] = 1  # Add cell pos to global grid
                     self.grid[grid_id(pos)] = 1  # Add cell pos to species grid
 

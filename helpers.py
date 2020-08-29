@@ -21,7 +21,7 @@ class DisplayEnvironment:
         plt.pause(0.01)
 
 
-class VideoWriterIo:
+class VideoWriter:
     def __init__(self, write_vid, fps):
         self.write_vid = write_vid
         self.fps = fps
@@ -51,44 +51,12 @@ class VideoWriterIo:
             os.remove(self.fig_path)
 
 
-class VideoWriter:
-    def __init__(self, write_vid, fps):
-        self.write_vid = write_vid
-
-        self.folder_path = Path(Path.cwd(), 'video_out')
-        self.vid_path = Path(self.folder_path, 'sim_' + datetime.now().strftime("%d%m%Y%H%M%S") + '.mp4v')
-        self.fig_path = Path(self.folder_path, 'temp.png')
-
-        self.fps = fps
-        self.video = []
-
-        if write_vid:
-            Path(self.folder_path).mkdir(exist_ok=True)
-            plt.savefig(self.fig_path)
-
-            frame = cv2.imread(str(self.fig_path))
-            height, width, layers = frame.shape
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            self.video = cv2.VideoWriter(str(self.vid_path), fourcc, self.fps, (width, height))
-
-    def get_frame(self):
-        if self.write_vid:
-            plt.savefig(self.fig_path)
-            self.video.write(cv2.imread(str(self.fig_path)))
-
-    def close(self):
-        if self.write_vid:
-            cv2.destroyAllWindows()
-            self.video.release()
-            os.remove(self.fig_path)
-
-
-class EntropyRecorder:
+class DataRecorder:
     def __init__(self, simulation_length, run):
         self.entropy = np.zeros(simulation_length)
         self.run = run
 
-    def record(self, i, grid):
+    def log(self, i, grid):
         if self.run:
             self.entropy[i] = skimage.measure.shannon_entropy(grid)
 

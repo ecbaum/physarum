@@ -32,6 +32,7 @@ class DataMap:
         spc = Species(self.size)
         spc.generate_cells(cell_amount)
         self.species.append(spc)
+        self.deposit_species_trail()
 
     def deposit_species_trail(self):
         #  Clear Trail sum
@@ -44,3 +45,4 @@ class DataMap:
     def species_activity(self):
         for spc in self.species:
             spc.activate(self)
+        self.deposit_species_trail()
