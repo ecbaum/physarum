@@ -14,13 +14,4 @@ virtualenv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
-### Background
-The physarum slime mold as been widely studies because it seemingly inhibits a form of [collective intelligence](https://www.nature.com/news/how-brainless-slime-molds-redefine-intelligence-1.11811), which which it can solve optimization problems such as solving [mazes](https://www.nature.com/articles/35035159), [shortest path problems](https://arxiv.org/abs/1106.0423) and [mimicking the Tokyo rail system](https://science.sciencemag.org/content/327/5964/439). More over, the slime mold can also be configured in such ways as to make [logical gates](https://www.sciencedirect.com/science/article/pii/S136970211400025X) and have been used for [dark matter simulations](https://www.nasa.gov/feature/goddard/2020/slime-mold-simulations-used-to-map-dark-matter-holding-universe-together).
 
-These characteristics of unicellular collective intelligence has inspired a variety of [optimization algorithms](https://arxiv.org/pdf/1712.02910.pdf) which tries to capture the traits of the physarum by modelling different aspects of the slime mold ranging from fluid dynamics to graph theory. 
-
-### Objective
-This a project in which I wish to use the system stipulated by Jeff Jones as a stepping stone to explore aspects of its possible traits of intelligence, approach it from a evolutionary simulation context and analyze it from a systems theory perspective to my best ability.
-
-
-![Multiple species](/images/image2.png)
