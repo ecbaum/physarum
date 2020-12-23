@@ -11,7 +11,10 @@ These sets of traits and conditions, published in a paper on [physarum patterns]
 ### installation
 ```
 virtualenv venv 
-venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+for windows
+```source venv/bin/activate``` becomes ```venv\Scripts\activate ``` 
 
