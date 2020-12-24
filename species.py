@@ -44,9 +44,21 @@ class Trail:
         self.size = np.array(size)
         self.grid = np.zeros(self.size)
 
-        self.alpha = 0.6
+        self.alpha = 0.7
         self.sigma = 1
 
     def diffuse(self, data_grid):
         self.grid = self.grid + data_grid
         self.grid = self.alpha * scipy.ndimage.filters.gaussian_filter(self.grid, self.sigma)
+
+
+class Nutrient:
+    def __init__(self, size):
+        self.size = np.array(size)
+        self.grid = np.zeros(self.size)
+
+    #def diffuse(self):
+
+     #   for i in range(self.size[0]):
+    #        for j in range(self.size[1]):
+
