@@ -1,29 +1,29 @@
 from helpers import VideoWriter, DataRecorder, DisplayEnvironment
-from environment import DataMap
+from physical_environment import Environment
 from tqdm import tqdm
 
 
 save_video = 0
 show_entropy = 0
 
-sz = (40, 60)
+env_size = (100, 133)
 simulation_length = 500
 fps = 60
 
 
-env = DataMap(sz)
-env.generate_species(60)
+env = Environment(env_size)
+env.generate_species(1000)
 
-display = DisplayEnvironment(env.img())
+display = DisplayEnvironment(env)
 writer = VideoWriter(save_video, fps)
-recorder = DataRecorder(simulation_length, show_entropy)
+recorder = DataRecorder(env, simulation_length, show_entropy)
 
 for i in tqdm(range(simulation_length)):
 
     env.species_activity()
-
-    display.update(env.img())
+    display.update()
     writer.get_frame()
-    recorder.log(i, env.grid)
+    recorder.log()
+
 writer.close()
 recorder.plot()

@@ -9,15 +9,30 @@ import skimage.measure
 
 
 class DisplayEnvironment:
-    def __init__(self, image):
+    def __init__(self, env):
         plt.figure()
-        self.fig = plt.imshow(image)
+        self.env = env
+        self.color_bias = [0, 0.45, 0.6]
+        self.color_maps = {0: 'Greens', 1: 'Reds', 2: 'Blues'}
+        self.color_intensity = [5, 5, 5]
+        self.fig = plt.imshow(self.img())
+
         plt.gca().set_axis_off()
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
         plt.margins(0, 0)
 
-    def update(self, image):
-        self.fig.set_array(image)
+    def img(self):
+        img = np.zeros(np.hstack((self.env.size, 4)))
+        n = len(self.env.species)
+        for i in range(n):
+            c_map = plt.get_cmap(self.color_maps[i])
+            img = img + c_map(self.color_intensity[i] * self.env.scent_trails[i]) - self.color_bias[n-1]
+        img[np.where(img > 1)] = 1
+        img[np.where(img < 0)] = 0
+        return img
+
+    def update(self):
+        self.fig.set_array(self.img())
         plt.pause(0.01)
 
 
@@ -52,13 +67,21 @@ class VideoWriter:
 
 
 class DataRecorder:
-    def __init__(self, simulation_length, run):
+    def __init__(self, env, simulation_length, run):
+        self.env = env
         self.entropy = np.zeros(simulation_length)
         self.run = run
+        self.i = 0
 
-    def log(self, i, grid):
+    def log(self):
+        grid = np.zeros(self.env.size)
+        for j in range(len(self.env.occupation_maps)):
+            grid += self.env.occupation_maps[j]
+        grid[np.where(grid > 1)] = 1
+
         if self.run:
-            self.entropy[i] = skimage.measure.shannon_entropy(grid)
+            self.entropy[self.i] = skimage.measure.shannon_entropy(grid)
+            self.i += 1
 
     def plot(self):
         if self.run:

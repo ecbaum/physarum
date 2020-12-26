@@ -3,11 +3,12 @@ from helpers import valid, grid_id
 
 
 class Cell:
-    def __init__(self, pos, id):
+    def __init__(self, pos, spc_id):
         # positional data
         self.pos = pos
-        self.id = id
+        self.id = spc_id
         self.angle = np.random.rand(1)*2*np.pi
+        self.nutrient = 0
 
         # sensor placement data
         self.sensor_distance = 8
@@ -53,7 +54,6 @@ class Cell:
         return rotation * np.pi
 
     def move(self, env):
-
         self.angle += np.random.rand(1) * self.decide()
         self.angle = np.mod(self.angle, 2 * np.pi)
 
@@ -62,4 +62,3 @@ class Cell:
         if env.valid(next_pos):
             env.move(self, self.pos, next_pos)
             self.pos = next_pos
-
