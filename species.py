@@ -5,13 +5,12 @@ from cell import Cell
 
 
 class Species:
-    def __init__(self, size):
+    def __init__(self, size, env):
         self.size = size
-        self.grid = np.zeros(self.size, dtype=int)
-        self.population_map = np.zeros(self.size, dtype=int)
-        self.trail = Trail(size)
         self.cells = []
         self.amount = []
+        self.id = -1
+        self.env = env
 
     def generate_cells(self, amount):
 
@@ -23,15 +22,11 @@ class Species:
             for tries in range(30):
                 pos = self.size * np.random.rand(2)
                 if np.linalg.norm(c-pos) < r:
-                    self.grid[grid_id(pos)] = 1  # Add cell pos to global grid
-                    self.grid[grid_id(pos)] = 1  # Add cell pos to species grid
-
-                    self.cells[i] = Cell(pos)
+                    cell = Cell(pos, self.id)
+                    self.cells[i] = cell
+                    self.env.data_map[pos[0]][pos[1]].append(cell)
                     i += 1
                     break
-
-    def deposit(self):
-        self.trail.diffuse(self.grid)
 
     def activate(self, data_map):
         trail_env = 2 * self.trail.grid - data_map.trail_sum
@@ -39,32 +34,8 @@ class Species:
             cell.observe(trail_env)  # Sense trail of species
             cell.move(data_map, self)
 
-    def update_population_map(self):
-        self.population_map = np.zeros(self.size, dtype=int)
-        for cell in self.cells:
-            self.population_map[cell.pos] += 1
-
-
-class Trail:
-    def __init__(self, size):
-        self.size = np.array(size)
-        self.grid = np.zeros(self.size)
-
-        self.alpha = 0.7
-        self.sigma = 1
-
-    def diffuse(self, data_grid):
-        self.grid = self.grid + data_grid
-        self.grid = self.alpha * scipy.ndimage.filters.gaussian_filter(self.grid, self.sigma)
-
-
-class Nutrient:
-    def __init__(self, size):
-        self.size = np.array(size)
-        self.grid = np.zeros(self.size)
-        self.dr = 1  # diffusion radius
-
-    def diffuse(self, population_map):
+    def diffuse_nutrients(self, population_map):
+        dr = 1  # diffusion radius
         for i in range(self.size[0]):
             for j in range(self.size[1]):
 
@@ -73,11 +44,11 @@ class Nutrient:
                 nutrient_lvl = 0
 
                 if cell_amount >= 1:
-                    for ii in range(-self.dr+1, self.dr+1):
-                        for jj in range(-self.dr+1, self.dr+1):
+                    for ii in range(-dr+1, dr+1):
+                        for jj in range(-dr+1, dr+1):
                             x_pos = ii + i
                             y_pos = jj + j
-                            if valid([x_pos, y_pos], self.grid) and population_map[x_pos, y_pos] >= 1:
+                            if valid([x_pos, y_pos], self.env.grid) and population_map[x_pos, y_pos] >= 1:
                                 neighbour_cell.append([x_pos, y_pos])
                                 nutrient_lvl += self.grid[x_pos, y_pos]
                 else:

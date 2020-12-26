@@ -3,16 +3,16 @@ from helpers import valid, grid_id
 
 
 class Cell:
-    def __init__(self, pos):
+    def __init__(self, pos, id):
         # positional data
         self.pos = pos
+        self.id = id
         self.angle = np.random.rand(1)*2*np.pi
 
         # sensor placement data
         self.sensor_distance = 8
         self.sensor_angle = np.pi/8
         self.sensor_width = 2
-
         self.sensor_data = np.zeros(3)
 
     def sensor_pos(self):
@@ -52,19 +52,14 @@ class Cell:
 
         return rotation * np.pi
 
-    def move(self, dm, spc):
+    def move(self, env):
 
         self.angle += np.random.rand(1) * self.decide()
         self.angle = np.mod(self.angle, 2 * np.pi)
 
         next_pos = self.pos + np.hstack((np.cos(self.angle), np.sin(self.angle)))
 
-        if valid(next_pos, dm.grid):
-
-            dm.grid[grid_id(self.pos)] = 0
-            dm.grid[grid_id(next_pos)] = 1
-
-            spc.grid[grid_id(self.pos)] = 0
-            spc.grid[grid_id(next_pos)] = 1
-
+        if env.valid(next_pos):
+            env.move(self, self.pos, next_pos)
             self.pos = next_pos
+

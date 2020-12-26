@@ -30,7 +30,7 @@ class DataMap:
             raise Exception("Color map currently only support up to three species")
 
         spc = Species(self.size)
-        spc.generate_cells(cell_amount)
+        spc.generate_cells(cell_amount, self)
         self.species.append(spc)
         self.deposit_species_trail()
 
