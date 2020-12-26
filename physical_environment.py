@@ -11,6 +11,7 @@ class Environment:
         self.species = list()
         self.occupation_maps = list()
         self.scent_trails = list()
+        self.simulate_nutrients = 0
 
         for i in range(size[0]):
             _row = [deque() for j in range(size[1])]
@@ -41,8 +42,8 @@ class Environment:
         self.generate_occupation_map()
         self.scent_trails = list()
 
-        decay = 0.7
-        sigma = 1
+        decay = 0.5
+        sigma = 2
 
         for species_id in range(len(self.species)):
             trail = decay * gaussian_filter(self.occupation_maps[species_id], sigma)
@@ -59,7 +60,8 @@ class Environment:
     def species_activity(self):
         for spc in self.species:
             spc.activate()
-            spc.diffuse_nutrients()
+            if self.simulate_nutrients:
+                spc.diffuse_nutrients()
         self.generate_scent_trails()
 
     def valid(self, pos):

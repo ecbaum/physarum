@@ -6,22 +6,24 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path
 import skimage.measure
+from scipy.ndimage import gaussian_filter
 
 
 class DisplayEnvironment:
     def __init__(self, env):
-        plt.figure()
         self.env = env
         self.color_bias = [0, 0.45, 0.6]
         self.color_maps = {0: 'Greens', 1: 'Reds', 2: 'Blues'}
         self.color_intensity = [5, 5, 5]
+        self.overlay_nutrients = 0
+
         self.fig = plt.imshow(self.img())
 
         plt.gca().set_axis_off()
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
         plt.margins(0, 0)
 
-    def img(self):
+    def pos_img(self):
         img = np.zeros(np.hstack((self.env.size, 4)))
         n = len(self.env.species)
         for i in range(n):
@@ -31,8 +33,25 @@ class DisplayEnvironment:
         img[np.where(img < 0)] = 0
         return img
 
+    def nutr_img(self):
+        img = np.zeros(self.env.size)
+        for i in range(self.env.size[0]):
+            for j in range(self.env.size[1]):
+                for cell in self.env.data_map[i][j]:
+                    img[i, j] += cell.nutrient
+        c_map = plt.get_cmap('gist_stern')
+        return c_map(img)
+
+    def img(self):
+        if self.overlay_nutrients:
+            img = 0.5*self.pos_img() + 0.5*gaussian_filter(self.nutr_img(), 0.5)
+        else:
+            img = self.pos_img()
+        return img
+
     def update(self):
         self.fig.set_array(self.img())
+
         plt.pause(0.01)
 
 
