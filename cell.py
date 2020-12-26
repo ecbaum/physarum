@@ -67,7 +67,4 @@ class Cell:
             spc.grid[grid_id(self.pos)] = 0
             spc.grid[grid_id(next_pos)] = 1
 
-            # Lägg till en map som håller koll på hur många av ens species är på samma ruta
-            # Använd den här kartan för resurser sedan.
-
             self.pos = next_pos

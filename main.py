@@ -25,6 +25,5 @@ for i in tqdm(range(simulation_length)):
     display.update(env.img())
     writer.get_frame()
     recorder.log(i, env.grid)
-
 writer.close()
 recorder.plot()
