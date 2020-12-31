@@ -17,7 +17,7 @@ class DisplayEnvironment:
         self.color_intensity = [5, 5, 5]
         self.overlay_nutrients = 0
 
-        self.fig = plt.imshow(self.img())
+        self.fig = plt.imshow(self.env.scent_trails[0])
 
         plt.gca().set_axis_off()
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
@@ -42,15 +42,41 @@ class DisplayEnvironment:
         c_map = plt.get_cmap('gist_stern')
         return c_map(img)
 
-    def img(self):
-        if self.overlay_nutrients:
-            img = 0.5*self.pos_img() + 0.5*gaussian_filter(self.nutr_img(), 0.5)
-        else:
-            img = self.pos_img()
-        return img
+    #def img(self):
+        #if self.overlay_nutrients:
+            #img = 0.5*self.pos_img() + 0.5*gaussian_filter(self.nutr_img(), 0.5)
+        #else:
+            #img = self.env.scent_trails[0].copy()
+            #for i in range(self.env.size[0]):
+                #for j in range(self.env.size[1]):
+                    #if self.env.occupation_maps[0][i, j] == 1:
+                        #img[i, j] = 1
+
+        #return self.env.scent_trails[0]
 
     def update(self):
-        self.fig.set_array(self.img())
+        c_map1 = plt.get_cmap('viridis')
+        c_map2 = plt.get_cmap('Greens')
+
+        img1 = self.env.scent_trails[0]
+        img2 = np.zeros(self.env.size)
+
+        for i in range(self.env.size[0]):
+            for j in range(self.env.size[1]):
+                for cell in self.env.data_map[i][j]:
+                    img2[i, j] += 100*cell.nutrient
+        cmap_img2 = c_map2(img2)
+        img = c_map1(img1)
+
+        for i in range(self.env.size[0]):
+            for j in range(self.env.size[1]):
+                if img2[i, j] > 0:
+                    for k in range(4):
+                        img[i,j,k] = cmap_img2[i,j,k]
+
+
+
+        self.fig.set_array(img)
 
         plt.pause(0.01)
 

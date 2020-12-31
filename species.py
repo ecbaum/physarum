@@ -1,5 +1,5 @@
 import numpy as np
-from cell import Cell
+from cell import Cell, NutrientSource
 
 
 class Species:
@@ -9,7 +9,7 @@ class Species:
         self.id = spc_id
         self.env = env
 
-    def generate_cells(self, amount):
+    def generate_cells(self, amount, cell_settings):
 
         self.cells = np.empty(amount, dtype=Cell)  # Cells in species
         r = self.env.size[0] / 2 * 0.8
@@ -19,7 +19,7 @@ class Species:
             for tries in range(30):
                 pos = self.env.size * np.random.rand(2)
                 if np.linalg.norm(c-pos) < r:
-                    cell = Cell(pos, self.id)
+                    cell = Cell(pos, self.id, cell_settings)
                     self.cells[i] = cell
 
                     cell_grid_pos = self.env.grid_pos(pos)
@@ -64,3 +64,18 @@ class Species:
 
                 for k in range(n):
                     neighbouring_cell[k].nutrient = nutrient_sum/n
+
+
+class Nutrients:
+    def __init__(self, env, amount):
+        self.env = env
+        self.amount = amount
+        self.sources = np.empty(amount, dtype=NutrientSource)
+
+        for k in range(amount):
+            pos = self.env.size * np.random.rand(2)
+            source = NutrientSource(pos)
+            self.sources[k] = source
+
+            source_grid_pos = self.env.grid_pos(pos)
+            self.env.data_map[source_grid_pos[0]][source_grid_pos[1]].append(source)

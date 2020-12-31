@@ -3,7 +3,7 @@ from helpers import valid, grid_id
 
 
 class Cell:
-    def __init__(self, pos, spc_id):
+    def __init__(self, pos, spc_id, cell_settings):
         # positional data
         self.pos = pos
         self.id = spc_id
@@ -11,9 +11,9 @@ class Cell:
         self.nutrient = 0
 
         # sensor placement data
-        self.sensor_distance = 8
-        self.sensor_angle = np.pi/8
-        self.sensor_width = 2
+        self.sensor_distance = cell_settings[0]
+        self.sensor_angle = cell_settings[1]
+        self.sensor_width = cell_settings[2]
         self.sensor_data = np.zeros(3)
 
     def sensor_pos(self):
@@ -43,22 +43,46 @@ class Cell:
         if front > left and front > right:
             rotation = 0
         elif front < left and front < right:
-            rotation = 2
+            rotation = 2*np.random.rand(1)
         elif left < right:
-            rotation = -1
+            rotation = -0.5
         elif right < left:
-            rotation = 1
+            rotation = 0.5
         else:
-            rotation = 2
+            rotation = 2*np.random.rand(1)
 
         return rotation * np.pi
 
     def move(self, env):
-        self.angle += np.random.rand(1) * self.decide()
+        self.angle += self.decide()
         self.angle = np.mod(self.angle, 2 * np.pi)
 
         next_pos = self.pos + np.hstack((np.cos(self.angle), np.sin(self.angle)))
 
         if env.valid(next_pos):
+           # if len(env.data_map[next_pos[0].astype(int)][next_pos[1].astype(int)]) == 0:
             env.move(self, self.pos, next_pos)
             self.pos = next_pos
+#            else:
+#                new_angle = 2 * np.pi*np.random.rand(1)
+#                next_pos = self.pos + np.hstack((np.cos(new_angle), np.sin(new_angle)))
+#                if env.valid(next_pos):
+#                    if len(env.data_map[next_pos[0].astype(int)][next_pos[1].astype(int)]) == 0:
+#                        env.move(self, self.pos, next_pos)
+#                        self.pos = next_pos
+
+
+class NutrientSource:
+    def __init__(self, pos):
+        self.pos = pos
+        self.id = -1
+        self.init_nutrient_val = 100
+        self.nutrient = self.init_nutrient_val
+        self.alpha = 0.05
+        self.gamma = 5
+
+    def extract_nutrient(self):
+        out = self.gamma*np.exp(-self.alpha*(self.init_nutrient_val-self.nutrient))
+        self.nutrient -= out
+        return out
+
