@@ -1,14 +1,11 @@
 import numpy as np
 from collections import deque
 from scipy.ndimage import gaussian_filter
-from species import Species
 
 
 class Environment:
-    def __init__(self, size, decay, sigma, simulate_nutrients):
+    def __init__(self, size, simulate_nutrients):
         self.size = np.array(size)
-        self.decay = decay
-        self.sigma = sigma
         self.simulate_nutrients = simulate_nutrients
 
         self.data_map = list()
@@ -47,10 +44,13 @@ class Environment:
     def generate_scent_trails(self):
         self.generate_occupation_map()
 
-        for species_id in range(len(self.species)):
-            trail = gaussian_filter(self.occupation_maps[species_id], self.sigma) + \
-                    self.decay*self.scent_trails[species_id]
-            self.scent_trails[species_id] = trail
+        for spc_id in range(len(self.species)):
+            occ_map = self.occupation_maps[spc_id]
+            decay = self.species[spc_id].scent_decay
+            sigma = self.species[spc_id].scent_sigma
+            scent_trail = self.scent_trails[spc_id]
+
+            self.scent_trails[spc_id] = gaussian_filter(occ_map, sigma) + decay*scent_trail
 
     def move(self, cell, pos_A, pos_B):
         grid_pos_a = self.grid_pos(pos_A)
@@ -67,8 +67,6 @@ class Environment:
             if self.simulate_nutrients:
                 for i in range(2):
                     spc.diffuse_nutrients()
-
-        #self.generate_scent_trails()
 
     def valid(self, pos):
         return 0 <= pos[0] < self.size[0] and 0 <= pos[1] < self.size[1]
