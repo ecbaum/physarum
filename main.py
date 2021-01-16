@@ -1,42 +1,40 @@
 from helpers import VideoWriter, DataRecorder, DisplayEnvironment
 from physical_environment import Environment
+from species import Species
 import numpy as np
 from tqdm import tqdm
 
-
+# Simulation settings
 save_video = 0
 show_entropy = 0
-simulate_nutrients = 1
-display_nutrients = 0
-
-env_size = (100, 130)
-simulation_length = 500
+simulate_nutrients = 0
+simulation_length = 100
 fps = 60
 
-decay = 0.5
-sigma = 0.8
+# Enviroment settings
+env_width = 30
+env_decay = 0.5
+env_sigma = 0.8
+env_size = (env_width, int(4/3*env_width))
 
-sensor_distance = 3
-sensor_angle = np.pi / 3
-sensor_width = 2
+env = Environment(env_size, env_decay, env_sigma, simulate_nutrients)
 
-env = Environment(env_size)
-env.settings([decay, sigma], [sensor_distance, sensor_angle, sensor_width])
-
-env.generate_species([1000])
-
-env.simulate_nutrients = simulate_nutrients
-
-env.species[0].cells[0].nutrient = 1
+# Species settings
+species_list = [Species(env, cell_amount=15,
+                        sensor_distance=3,
+                        sensor_angle=np.radians(60),
+                        sensor_width=2)]
 
 
+env.generate_species(species_list)
 display = DisplayEnvironment(env)
-display.overlay_nutrients = display_nutrients
 writer = VideoWriter(save_video, fps)
 recorder = DataRecorder(env, simulation_length, show_entropy)
 
 for i in tqdm(range(simulation_length)):
-
+    if i == 1:
+        env.species[0].cells[0].nutrient = 1.3
+        #env.species[0].cells[1].nutrient = 1.3
     env.species_activity()
     display.update()
     writer.get_frame()

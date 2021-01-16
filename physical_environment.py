@@ -5,33 +5,29 @@ from species import Species
 
 
 class Environment:
-    def __init__(self, size):
+    def __init__(self, size, decay, sigma, simulate_nutrients):
         self.size = np.array(size)
+        self.decay = decay
+        self.sigma = sigma
+        self.simulate_nutrients = simulate_nutrients
+
         self.data_map = list()
         self.species = list()
         self.occupation_maps = list()
         self.scent_trails = list()
-        self.simulate_nutrients = 0
-        self.decay = []
-        self.sigma = []
-        self.cell_settings = []
 
         for i in range(size[0]):
             _row = [deque() for j in range(size[1])]
             self.data_map.append(_row)
 
-    def settings(self, env_settings, cell_settings):
-        self.decay = env_settings[0]
-        self.sigma = env_settings[1]
-        self.cell_settings = cell_settings
-
-    def generate_species(self, spc_cell_amount_list):
-        if len(spc_cell_amount_list) >= 3:
+    def generate_species(self, species_list):
+        if len(species_list) >= 3:
             raise Exception("Color map currently only support up to three species")
 
-        for spc_id in range(len(spc_cell_amount_list)):
-            spc = Species(self, spc_id)
-            spc.generate_cells(spc_cell_amount_list[spc_id], self.cell_settings)
+        for spc_id in range(len(species_list)):
+            spc = species_list[spc_id]
+            spc.id = spc_id
+            spc.generate_cells()
             self.species.append(spc)
             self.scent_trails.append(np.zeros(self.size))
         self.generate_occupation_map()
@@ -54,7 +50,7 @@ class Environment:
         for species_id in range(len(self.species)):
             trail = gaussian_filter(self.occupation_maps[species_id], self.sigma) + \
                     self.decay*self.scent_trails[species_id]
-            self.scent_trails[species_id] = gaussian_filter(self.occupation_maps[species_id], self.sigma)
+            self.scent_trails[species_id] = trail
 
     def move(self, cell, pos_A, pos_B):
         grid_pos_a = self.grid_pos(pos_A)
@@ -69,7 +65,7 @@ class Environment:
         for spc in self.species:
             spc.activate()
             if self.simulate_nutrients:
-                for i in range(1):
+                for i in range(2):
                     spc.diffuse_nutrients()
 
         #self.generate_scent_trails()

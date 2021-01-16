@@ -3,23 +3,23 @@ from cell import Cell, NutrientSource
 
 
 class Species:
-    def __init__(self, env, spc_id):
+    def __init__(self, env, cell_amount, sensor_distance, sensor_angle, sensor_width):
         self.cells = []
-        self.amount = []
-        self.id = spc_id
+        self.amount = cell_amount
         self.env = env
+        self.id = -1
+        self.cell_settings = [sensor_distance, sensor_angle, sensor_width]
 
-    def generate_cells(self, amount, cell_settings):
-
-        self.cells = np.empty(amount, dtype=Cell)  # Cells in species
+    def generate_cells(self):
+        self.cells = np.empty(self.amount, dtype=Cell)  # Cells in species
         r = self.env.size[0] / 2 * 0.8
         c = self.env.size / 2
         i = 0
-        for k in range(amount):
+        for k in range(self.amount):
             for tries in range(30):
                 pos = self.env.size * np.random.rand(2)
                 if np.linalg.norm(c-pos) < r:
-                    cell = Cell(pos, self.id, cell_settings)
+                    cell = Cell(pos, self.id, self.cell_settings)
                     self.cells[i] = cell
 
                     cell_grid_pos = self.env.grid_pos(pos)
