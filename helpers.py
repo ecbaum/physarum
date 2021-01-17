@@ -58,7 +58,7 @@ class DisplayEnvironment:
         c_map1 = plt.get_cmap('viridis')
         c_map2 = plt.get_cmap('Reds')
 
-        img1 = gaussian_filter(self.env.scent_trails[0],1)
+        img1 = gaussian_filter(self.env.scent_trails[0]+self.env.scent_trails[1], 1)
         img2 = np.zeros(self.env.size)
 
         for i in range(self.env.size[0]):
@@ -70,7 +70,7 @@ class DisplayEnvironment:
 
         for i in range(self.env.size[0]):
             for j in range(self.env.size[1]):
-                if img2[i, j] > 0.02:
+                if img2[i, j] > 0.0:
                     for k in range(4):
                         img[i, j, k] = cmap_img2[i, j, k]
 

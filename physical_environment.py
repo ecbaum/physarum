@@ -1,5 +1,6 @@
 import numpy as np
 from collections import deque
+from species import Nutrient
 from scipy.ndimage import gaussian_filter
 
 
@@ -24,33 +25,14 @@ class Environment:
         for spc_id in range(len(species_list)):
             spc = species_list[spc_id]
             spc.id = spc_id
-            spc.generate_cells()
+            if type(spc) != Nutrient:
+                spc.generate_cells()
             self.species.append(spc)
             self.scent_trails.append(np.zeros(self.size))
-        self.generate_occupation_map()
-
-    def generate_occupation_map(self):
-        self.occupation_maps = list()
-        for species_id in range(len(self.species)):
-            occupation_map = np.zeros(self.size)
-            for i in range(self.size[0]):
-                for j in range(self.size[1]):
-                    for cell in self.data_map[i][j]:
-                        if cell.id == species_id:
-                            occupation_map[i, j] = 1
-                            break
-            self.occupation_maps.append(occupation_map)
 
     def generate_scent_trails(self):
-        self.generate_occupation_map()
-
         for spc_id in range(len(self.species)):
-            occ_map = self.occupation_maps[spc_id]
-            decay = self.species[spc_id].scent_decay
-            sigma = self.species[spc_id].scent_sigma
-            scent_trail = self.scent_trails[spc_id]
-
-            self.scent_trails[spc_id] = gaussian_filter(occ_map, sigma) + decay*scent_trail
+            self.scent_trails[spc_id] = self.species[spc_id].scent_trail(self.scent_trails[spc_id])
 
     def move(self, cell, pos_A, pos_B):
         grid_pos_a = self.grid_pos(pos_A)
@@ -59,14 +41,16 @@ class Environment:
             return
         self.data_map[grid_pos_a[0]][grid_pos_a[1]].remove(cell)
         self.data_map[grid_pos_b[0]][grid_pos_b[1]].append(cell)
+        #print(self.data_map[grid_pos_b[0]][grid_pos_b[1]])
 
     def species_activity(self):
         self.generate_scent_trails()
         for spc in self.species:
-            spc.activate()
-            if self.simulate_nutrients:
-                for i in range(2):
-                    spc.diffuse_nutrients()
+            if type(spc) != Nutrient:
+                spc.activate()
+                if self.simulate_nutrients:
+                    for i in range(2):
+                        spc.diffuse_nutrients()
 
     def valid(self, pos):
         return 0 <= pos[0] < self.size[0] and 0 <= pos[1] < self.size[1]

@@ -60,16 +60,8 @@ class Cell:
         next_pos = self.pos + np.hstack((np.cos(self.angle), np.sin(self.angle)))
 
         if env.valid(next_pos):
-           # if len(env.data_map[next_pos[0].astype(int)][next_pos[1].astype(int)]) == 0:
             env.move(self, self.pos, next_pos)
             self.pos = next_pos
-#            else:
-#                new_angle = 2 * np.pi*np.random.rand(1)
-#                next_pos = self.pos + np.hstack((np.cos(new_angle), np.sin(new_angle)))
-#                if env.valid(next_pos):
-#                    if len(env.data_map[next_pos[0].astype(int)][next_pos[1].astype(int)]) == 0:
-#                        env.move(self, self.pos, next_pos)
-#                        self.pos = next_pos
 
 
 class NutrientSource:
@@ -78,11 +70,12 @@ class NutrientSource:
         self.id = -1
         self.init_nutrient_val = 100
         self.nutrient = self.init_nutrient_val
-        self.alpha = 0.05
+        self.alpha = 0.04
         self.gamma = 5
+        self.available_output = self.gamma*np.exp(-self.alpha*(self.init_nutrient_val-self.nutrient))
 
     def extract_nutrient(self):
-        out = self.gamma*np.exp(-self.alpha*(self.init_nutrient_val-self.nutrient))
+        out = self.available_output
         self.nutrient -= out
         return out
 
