@@ -1,4 +1,4 @@
-from helpers import VideoWriter, DataRecorder, DisplayEnvironment
+from helpers import VideoWriter, DataLogger, DisplayEnvironment
 from physical_environment import Environment
 from species import Species, Nutrient
 import numpy as np
@@ -7,41 +7,40 @@ from tqdm import tqdm
 # Simulation settings
 save_video = 0
 show_entropy = 0
-
-simulation_length = 300
 fps = 60
 
-# Enviroment settings
-simulate_nutrients = 1
+simulation_length = 100
+simulate_nutrients = 0
 env_width = 100
-env_size = (env_width, int(4/3*env_width))
-
-env = Environment(env_size, simulate_nutrients)
+env_aspect_ratio = 4/3
 
 # Species settings
-species_list = [Species(env, 400,
+species_list = [Species(cell_amount=400,
                         scent_decay=0.8,
                         scent_sigma=0.4,
                         sensor_distance=3,
                         sensor_angle=np.radians(70),
                         sensor_width=1),
-                Nutrient(env, 10, 0.95, 2)]
+
+                Nutrient(cell_amount=10,
+                         scent_decay=0.95,
+                         scent_sigma=2)]
 
 
-env.generate_species(species_list)
-#nutr = Nutrient(env,10,0.5,0.5)
-#env.generate_nutrients(nutr)
+env = Environment(width=env_width,
+                  aspect_ratio=env_aspect_ratio,
+                  species_list=species_list,
+                  sim_nutr=simulate_nutrients)
+
 display = DisplayEnvironment(env)
 writer = VideoWriter(save_video, fps)
-recorder = DataRecorder(env, simulation_length, show_entropy)
+logger = DataLogger(env, simulation_length, show_entropy)
 
-for i in tqdm(range(simulation_length)):
-    #if i == 1:
-    #    env.species[0].cells[0].nutrient = 1.3
-    env.species_activity()
-    display.update()
-    writer.get_frame()
-    recorder.log()
 
-writer.close()
-recorder.plot()
+with writer, logger:
+    for i in tqdm(range(simulation_length)):
+        env.simulate()
+        display.update()
+        writer.get_frame()
+        logger.log()
+

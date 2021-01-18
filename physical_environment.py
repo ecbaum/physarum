@@ -1,34 +1,35 @@
 import numpy as np
 from collections import deque
 from species import Nutrient
-from scipy.ndimage import gaussian_filter
 
 
 class Environment:
-    def __init__(self, size, simulate_nutrients):
-        self.size = np.array(size)
-        self.simulate_nutrients = simulate_nutrients
+    def __init__(self, width, aspect_ratio, species_list, sim_nutr):
+        self.size = np.array((width, int(aspect_ratio*width)))
+        self.sim_nutr = sim_nutr
 
         self.data_map = list()
         self.species = list()
         self.occupation_maps = list()
         self.scent_trails = list()
 
-        for i in range(size[0]):
-            _row = [deque() for j in range(size[1])]
+        for i in range(self.size[0]):
+            _row = [deque() for j in range(self.size[1])]
             self.data_map.append(_row)
+
+        self.generate_species(species_list)
 
     def generate_species(self, species_list):
         if len(species_list) >= 3:
             raise Exception("Color map currently only support up to three species")
 
-        for spc_id in range(len(species_list)):
-            spc = species_list[spc_id]
+        for spc_id, spc in enumerate(species_list):
             spc.id = spc_id
-            if type(spc) != Nutrient:
-                spc.generate_cells()
+            spc.env = self
+            spc.generate()
             self.species.append(spc)
             self.scent_trails.append(np.zeros(self.size))
+            self.occupation_maps.append(np.zeros(self.size))
 
     def generate_scent_trails(self):
         for spc_id in range(len(self.species)):
@@ -41,14 +42,13 @@ class Environment:
             return
         self.data_map[grid_pos_a[0]][grid_pos_a[1]].remove(cell)
         self.data_map[grid_pos_b[0]][grid_pos_b[1]].append(cell)
-        #print(self.data_map[grid_pos_b[0]][grid_pos_b[1]])
 
-    def species_activity(self):
+    def simulate(self):
         self.generate_scent_trails()
         for spc in self.species:
             if type(spc) != Nutrient:
                 spc.activate()
-                if self.simulate_nutrients:
+                if self.sim_nutr:
                     for i in range(2):
                         spc.diffuse_nutrients()
 
@@ -59,4 +59,4 @@ class Environment:
         if self.valid(pos):
             return tuple(pos.astype(int))
         else:
-            raise Exception("Position [" + str(pos[0]) + ", " + str(pos[1]) + "] outside of grid.")
+            raise Exception(f"Position {pos} outside of grid of size {self.size}")

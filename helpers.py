@@ -79,7 +79,7 @@ class DisplayEnvironment:
         return
 
 
-class VideoWriter:
+class VideoWriter(object):
     def __init__(self, write_vid, fps):
         self.write_vid = write_vid
         self.fps = fps
@@ -87,14 +87,21 @@ class VideoWriter:
         self.folder_path = Path(Path.cwd(), 'video_out')
         self.vid_path = Path(self.folder_path, 'sim_' + datetime.now().strftime("%d%m%Y%H%M%S") + '.mp4')
         self.fig_path = Path(self.folder_path, 'temp.png')
+        self.writer = None
 
-        self.writer = []
-
-        if write_vid:
+    def __enter__(self):
+        if self.write_vid:
             Path(self.folder_path).mkdir(exist_ok=True)
             plt.savefig(self.fig_path)
 
             self.writer = imageio.get_writer(self.vid_path, fps=self.fps)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.write_vid:
+            cv2.destroyAllWindows()
+            self.writer.close()
+            os.remove(self.fig_path)
 
     def get_frame(self):
         if self.write_vid:
@@ -102,31 +109,18 @@ class VideoWriter:
             im = imageio.imread(str(self.fig_path))
             self.writer.append_data(im)
 
-    def close(self):
-        if self.write_vid:
-            cv2.destroyAllWindows()
-            self.writer.close()
-            os.remove(self.fig_path)
 
-
-class DataRecorder:
+class DataLogger(object):
     def __init__(self, env, simulation_length, run):
         self.env = env
         self.entropy = np.zeros(simulation_length)
         self.run = run
         self.i = 0
 
-    def log(self):
-        grid = np.zeros(self.env.size)
-        for j in range(len(self.env.occupation_maps)):
-            grid += self.env.occupation_maps[j]
-        grid[np.where(grid > 1)] = 1
+    def __enter__(self):
+        return self
 
-        if self.run:
-            self.entropy[self.i] = skimage.measure.shannon_entropy(grid)
-            self.i += 1
-
-    def plot(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         if self.run:
             plt.show()
             plt.figure()
@@ -134,6 +128,15 @@ class DataRecorder:
             plt.title("Entropy of system over time")
             plt.ylabel("Shannon entropy")
             plt.xlabel("Iteration")
+
+    def log(self):
+        if self.run:
+            grid = np.zeros(self.env.size)
+            for j in range(len(self.env.occupation_maps)):
+                grid += self.env.occupation_maps[j]
+                grid[np.where(grid > 1)] = 1
+            self.entropy[self.i] = skimage.measure.shannon_entropy(grid)
+            self.i += 1
 
 
 def valid(pos, grid):
