@@ -9,22 +9,22 @@ save_video = 0
 show_entropy = 0
 fps = 60
 
-simulation_length = 100
-simulate_nutrients = 0
-env_width = 100
+simulation_length = 1000
+simulate_nutrients = 1
+env_width = 50
 env_aspect_ratio = 4/3
 
 # Species settings
-species_list = [Species(cell_amount=400,
+species_list = [Species(cell_amount=50,
                         scent_decay=0.8,
                         scent_sigma=0.4,
                         sensor_distance=3,
                         sensor_angle=np.radians(70),
                         sensor_width=1),
 
-                Nutrient(cell_amount=10,
-                         scent_decay=0.95,
-                         scent_sigma=2)]
+                Nutrient(cell_amount=1,
+                         scent_decay=0.9,
+                         scent_sigma=4)]
 
 
 env = Environment(width=env_width,
@@ -43,4 +43,5 @@ with writer, logger:
         display.update()
         writer.get_frame()
         logger.log()
+
 

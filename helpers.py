@@ -7,6 +7,20 @@ from datetime import datetime
 from pathlib import Path
 import skimage.measure
 from scipy.ndimage import gaussian_filter
+import tqdm
+import time
+
+
+def timer(orig_func):
+
+    def wrapper(*args, **kwargs):
+        t1 = time.time()
+        result = orig_func(*args, **kwargs)
+        t2 = time.time() - t1
+        tqdm.tqdm.write(f'{orig_func.__name__} ran in {t2} sec')
+        return result
+
+    return wrapper
 
 
 class DisplayEnvironment:
@@ -55,27 +69,29 @@ class DisplayEnvironment:
         #return self.env.scent_trails[0]
 
     def update(self):
+
         c_map1 = plt.get_cmap('viridis')
         c_map2 = plt.get_cmap('Reds')
-
         img1 = gaussian_filter(self.env.scent_trails[0]+self.env.scent_trails[1], 1)
         img2 = np.zeros(self.env.size)
 
-        for i in range(self.env.size[0]):
-            for j in range(self.env.size[1]):
-                for cell in self.env.data_map[i][j]:
-                    img2[i, j] += 100*cell.nutrient
+        for spc in self.env.species:
+            for cell in spc.cells:
+                pos = grid_id(cell.pos)
+                img2[pos] += 100 * cell.nutrient
+        img2 = np.array(img2)
         cmap_img2 = c_map2(img2)
         img = c_map1(img1)
+        #plt.figure(10)
 
-        for i in range(self.env.size[0]):
-            for j in range(self.env.size[1]):
-                if img2[i, j] > 0.0:
-                    for k in range(4):
-                        img[i, j, k] = cmap_img2[i, j, k]
-
+        x_range, y_range = np.where(img2 > 0)
+        for i, j in zip(x_range, y_range):
+            for k in range(4):
+                img[i, j, k] = cmap_img2[i, j, k]
         self.fig.set_array(img)
-        plt.pause(0.01)
+        plt.pause(0.000001)
+        #t2 = time.time() - t1
+        #tqdm.tqdm.write(f"time: {1/t2} sec")
         return
 
 
@@ -141,7 +157,6 @@ class DataLogger(object):
 
 def valid(pos, grid):
     return 0 <= pos[0] < grid.shape[0] and 0 < pos[1] < grid.shape[1]
-
 
 def grid_id(pos):
     return tuple(pos.astype(int))

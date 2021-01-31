@@ -69,13 +69,13 @@ class NutrientSource:
         self.pos = pos
         self.id = -1
         self.init_nutrient_val = 100
-        self.nutrient = self.init_nutrient_val
+        self.nutrient_level = self.init_nutrient_val
         self.alpha = 0.04
         self.gamma = 5
-        self.available_output = self.gamma*np.exp(-self.alpha*(self.init_nutrient_val-self.nutrient))
+        self.nutrient = self.gamma*np.exp(-self.alpha*(self.init_nutrient_val-self.nutrient_level))  # Available output
 
     def extract_nutrient(self):
-        out = self.available_output
-        self.nutrient -= out
+        out = self.nutrient
+        self.nutrient_level -= out
         return out
 

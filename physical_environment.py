@@ -1,21 +1,20 @@
 import numpy as np
 from collections import deque
 from species import Nutrient
+from helpers import timer
 
 
 class Environment:
     def __init__(self, width, aspect_ratio, species_list, sim_nutr):
         self.size = np.array((width, int(aspect_ratio*width)))
         self.sim_nutr = sim_nutr
-
-        self.data_map = list()
         self.species = list()
         self.occupation_maps = list()
         self.scent_trails = list()
+        self.sigma = 0.1
 
-        for i in range(self.size[0]):
-            _row = [deque() for j in range(self.size[1])]
-            self.data_map.append(_row)
+        # Creates a size[0] x size[1] list of empty deque()
+        self.data_map = [list() + [deque() for _ in range(self.size[1])] for _ in range(self.size[0])]
 
         self.generate_species(species_list)
 

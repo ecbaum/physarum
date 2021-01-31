@@ -1,6 +1,7 @@
 import numpy as np
 from cell import Cell, NutrientSource
 from scipy.ndimage import gaussian_filter
+from helpers import timer
 
 
 class Species:
@@ -39,7 +40,11 @@ class Species:
         for cell in self.cells:
             occupation_map[self.env.grid_pos(cell.pos)] = 1
         self.env.occupation_maps[self.id] = occupation_map
-        return gaussian_filter(occupation_map + self.scent_decay * previous_scent_trail, self.scent_sigma)
+
+        scent_addition = gaussian_filter(occupation_map, self.scent_sigma)
+        previous_scent = gaussian_filter(previous_scent_trail, self.env.sigma)
+
+        return scent_addition + self.scent_decay * previous_scent
 
     def activate(self):
         known_scent = self.env.scent_trails[self.id]
@@ -69,16 +74,14 @@ class Species:
 
                         if self.env.valid([x_pos, y_pos]):
                             for cell in self.env.data_map[x_pos][y_pos]:
-                                if type(cell) == Nutrient:
-                                    print("he")
-                                if cell.id == self.id:
+                                if cell.id == self.id or type(cell) == NutrientSource:
                                     neighbouring_cell.append(cell)
 
                 n = len(neighbouring_cell)
 
                 nutrient_sum = 0
                 for k in range(n):
-                    if type(neighbouring_cell[k]) == Nutrient:
+                    if type(neighbouring_cell[k]) == NutrientSource:
                         nutrient_sum += neighbouring_cell[k].extract_nutrient()
                     else:
                         nutrient_sum += neighbouring_cell[k].nutrient
@@ -92,26 +95,30 @@ class Nutrient:
     def __init__(self, cell_amount, scent_decay, scent_sigma):
         self.env = None
         self.amount = cell_amount
+        self.pos = None
         self.scent_decay = scent_decay
         self.scent_sigma = scent_sigma
-        self.sources = np.empty(cell_amount, dtype=NutrientSource)
+        self.cells = np.empty(cell_amount, dtype=NutrientSource)
         self.display_factor = 5
         self.id = -1
 
     def generate(self):
         for k in range(self.amount):
-            pos = self.env.size * np.random.rand(2)
-            source = NutrientSource(pos)
-            self.sources[k] = source
+            self.pos = self.env.size * np.random.rand(2)
+            source = NutrientSource(self.pos)
+            self.cells[k] = source
 
-            source_grid_pos = self.env.grid_pos(pos)
+            source_grid_pos = self.env.grid_pos(self.pos)
             self.env.data_map[source_grid_pos[0]][source_grid_pos[1]].append(source)
 
     def scent_trail(self, previous_scent_trail):
         occupation_map = np.zeros(self.env.size)
-        for cell in self.sources:
-            occupation_map[self.env.grid_pos(cell.pos)] = cell.available_output/self.display_factor
+        for cell in self.cells:
+            occupation_map[self.env.grid_pos(cell.pos)] = cell.nutrient/self.display_factor
         self.env.occupation_maps[self.id] = occupation_map
-        #return gaussian_filter(occupation_map + self.scent_decay * previous_scent_trail, self.scent_sigma)
-        return gaussian_filter(occupation_map, self.scent_sigma) + self.scent_decay * previous_scent_trail
+
+        scent_addition = gaussian_filter(occupation_map, self.scent_sigma)
+        previous_scent = gaussian_filter(previous_scent_trail, self.env.sigma)
+
+        return scent_addition + self.scent_decay * previous_scent
 
