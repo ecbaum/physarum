@@ -39,7 +39,7 @@ class DisplayEnvironment:
 
     def pos_img(self):
         img = np.zeros(np.hstack((self.env.size, 4)))
-        n = len(self.env.species)
+        n = len(self.env.organism)
         for i in range(n):
             c_map = plt.get_cmap(self.color_maps[i])
             img = img + c_map(self.color_intensity[i] * self.env.scent_trails[i]) - self.color_bias[n-1]
@@ -75,7 +75,7 @@ class DisplayEnvironment:
         img1 = gaussian_filter(self.env.scent_trails[0]+self.env.scent_trails[1], 1)
         img2 = np.zeros(self.env.size)
 
-        for spc in self.env.species:
+        for spc in self.env.organism:
             for cell in spc.cells:
                 pos = grid_id(cell.pos)
                 img2[pos] += 100 * cell.nutrient

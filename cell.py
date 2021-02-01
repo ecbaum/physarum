@@ -1,6 +1,12 @@
 import numpy as np
 from helpers import valid, grid_id
 
+#class Organism:
+#    def __init__(self, pos, org_id=-1):
+#        self.pos = pos
+#        self.id = org_id
+#        self.nutrient = 0
+
 
 class Cell:
     def __init__(self, pos, spc_id, cell_settings):
@@ -70,12 +76,15 @@ class NutrientSource:
         self.id = -1
         self.init_nutrient_val = 100
         self.nutrient_level = self.init_nutrient_val
-        self.alpha = 0.04
-        self.gamma = 5
+        self.alpha = 0.1
+        self.gamma = 2.5
         self.nutrient = self.gamma*np.exp(-self.alpha*(self.init_nutrient_val-self.nutrient_level))  # Available output
 
     def extract_nutrient(self):
-        out = self.nutrient
+        out = 0
+        if self.nutrient_level - self.nutrient > 0:
+            out = self.nutrient
+
         self.nutrient_level -= out
         return out
 
